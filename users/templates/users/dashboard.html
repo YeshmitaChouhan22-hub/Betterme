@@ -1,0 +1,114 @@
+{% extends 'users/base.html' %}
+{% block title %}Dashboard - BetterMe{% endblock %}
+
+{% block content %}
+<div class="mb-8">
+    <h1 class="text-2xl font-bold text-gray-800">Your Dashboard 📊</h1>
+    <p class="text-gray-400 text-sm mt-1">A look at your growth journey so far</p>
+</div>
+
+<!-- Stats Cards -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
+    <div class="bg-white border border-peach-100 rounded-2xl p-5 shadow-sm text-center">
+        <div class="text-3xl font-bold text-peach-400">{{ total_habits }}</div>
+        <div class="text-sm text-gray-400 mt-1">Total Habits</div>
+    </div>
+    <div class="bg-white border border-peach-100 rounded-2xl p-5 shadow-sm text-center">
+        <div class="text-3xl font-bold text-peach-400">{{ completed_habits }}</div>
+        <div class="text-sm text-gray-400 mt-1">Completed Today</div>
+    </div>
+    <div class="bg-white border border-peach-100 rounded-2xl p-5 shadow-sm text-center">
+        <div class="text-3xl font-bold text-peach-400">{{ total_journals }}</div>
+        <div class="text-sm text-gray-400 mt-1">Journal Entries</div>
+    </div>
+    <div class="bg-white border border-peach-100 rounded-2xl p-5 shadow-sm text-center">
+        <div class="text-3xl font-bold text-peach-400">🔥 {{ top_streak }}</div>
+        <div class="text-sm text-gray-400 mt-1">Top Streak</div>
+    </div>
+</div>
+
+<!-- Charts -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+    <!-- Mood Chart -->
+    <div class="bg-white border border-peach-100 rounded-2xl p-6 shadow-sm">
+        <h3 class="font-semibold text-gray-700 mb-4">Mood Frequency 🌿</h3>
+        {% if mood_labels %}
+        <canvas id="moodChart" height="200"></canvas>
+        {% else %}
+        <div class="text-center py-10 text-gray-300">
+            <p>No reflections yet</p>
+            <a href="{% url 'reflection_create' %}" class="text-peach-400 text-sm hover:underline">Log your first one</a>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Habit Streaks Chart -->
+    <div class="bg-white border border-peach-100 rounded-2xl p-6 shadow-sm">
+        <h3 class="font-semibold text-gray-700 mb-4">Habit Streaks 🔥</h3>
+        {% if habit_labels %}
+        <canvas id="habitChart" height="200"></canvas>
+        {% else %}
+        <div class="text-center py-10 text-gray-300">
+            <p>No habits yet</p>
+            <a href="{% url 'habit_create' %}" class="text-peach-400 text-sm hover:underline">Add your first habit</a>
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    {% if mood_labels %}
+    const moodCtx = document.getElementById('moodChart').getContext('2d');
+    new Chart(moodCtx, {
+        type: 'doughnut',
+        data: {
+            labels: {{ mood_labels|safe }},
+            datasets: [{
+                data: {{ mood_data|safe }},
+                backgroundColor: [
+                    '#ffb088', '#ffd0b0', '#ff8c5a',
+                    '#f97340', '#ffe8d6', '#fdf6ec', '#fff8f3'
+                ],
+                borderWidth: 0,
+            }]
+        },
+        options: {
+            plugins: {
+                legend: { position: 'bottom', labels: { font: { size: 12 } } }
+            }
+        }
+    });
+    {% endif %}
+
+    {% if habit_labels %}
+    const habitCtx = document.getElementById('habitChart').getContext('2d');
+    new Chart(habitCtx, {
+        type: 'bar',
+        data: {
+            labels: {{ habit_labels|safe }},
+            datasets: [{
+                label: 'Streak (days)',
+                data: {{ habit_streaks|safe }},
+                backgroundColor: '#ffb088',
+                borderRadius: 8,
+                borderWidth: 0,
+            }]
+        },
+        options: {
+            plugins: { legend: { display: false } },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { stepSize: 1 },
+                    grid: { color: '#fdf6ec' }
+                },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+    {% endif %}
+</script>
+{% endblock %}
