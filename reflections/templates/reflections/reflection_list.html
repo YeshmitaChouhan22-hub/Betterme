@@ -1,0 +1,38 @@
+{% extends 'users/base.html' %}
+{% block title %}My Reflections - BetterMe{% endblock %}
+
+{% block content %}
+<div class="flex justify-between items-center mb-8">
+    <div>
+        <h1 class="text-2xl font-bold text-gray-800">My Reflections 🌿</h1>
+        <p class="text-gray-400 text-sm mt-1">Your emotional journey, one day at a time</p>
+    </div>
+    <a href="{% url 'reflection_create' %}"
+        class="bg-peach-400 hover:bg-peach-500 text-white px-4 py-2 rounded-xl text-sm transition">
+        + New Reflection
+    </a>
+</div>
+
+{% for reflection in reflections %}
+<div class="bg-white border border-peach-100 rounded-2xl p-6 mb-4 shadow-sm">
+    <p class="text-sm text-gray-400 mb-3">📅 {{ reflection.created_at|date:"F j, Y" }}</p>
+    <div class="flex gap-4 mb-4">
+        <span class="bg-peach-50 text-peach-500 px-3 py-1 rounded-full text-sm">
+            Feeling: {{ reflection.emotion }}
+        </span>
+        <span class="bg-cream-100 text-gray-500 px-3 py-1 rounded-full text-sm">
+            Activity: {{ reflection.activity }}
+        </span>
+    </div>
+    <div class="bg-peach-50 border border-peach-100 rounded-xl px-4 py-3">
+        <p class="text-peach-600 text-sm italic">{{ reflection.affirmation }}</p>
+    </div>
+</div>
+{% empty %}
+<div class="text-center py-16 text-gray-400">
+    <div class="text-5xl mb-4">🌸</div>
+    <p class="text-lg">No reflections yet.</p>
+    <p class="text-sm mt-1">Log how you feel today and get a personal affirmation!</p>
+</div>
+{% endfor %}
+{% endblock %}

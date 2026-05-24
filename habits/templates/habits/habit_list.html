@@ -1,0 +1,50 @@
+{% extends 'users/base.html' %}
+{% block title %}My Habits - BetterMe{% endblock %}
+
+{% block content %}
+<div class="flex justify-between items-center mb-8">
+    <div>
+        <h1 class="text-2xl font-bold text-gray-800">My Habits ✅</h1>
+        <p class="text-gray-400 text-sm mt-1">Small steps every day lead to big change</p>
+    </div>
+    <a href="{% url 'habit_create' %}"
+        class="bg-peach-400 hover:bg-peach-500 text-white px-4 py-2 rounded-xl text-sm transition">
+        + Add Habit
+    </a>
+</div>
+
+{% for habit in habits %}
+<div class="bg-white border border-peach-100 rounded-2xl p-5 mb-4 shadow-sm flex justify-between items-center">
+    <div>
+        <h3 class="font-semibold text-gray-800">{{ habit.habit_name }}</h3>
+        <p class="text-sm text-gray-400 mt-1">
+            🔥 {{ habit.streak_count }} day streak
+            &nbsp;·&nbsp;
+            {% if habit.is_completed %}
+                <span class="text-green-500">Completed today ✅</span>
+            {% else %}
+                <span class="text-peach-400">Pending ⏳</span>
+            {% endif %}
+        </p>
+    </div>
+    <div class="flex gap-3">
+        {% if not habit.is_completed %}
+        <a href="{% url 'habit_complete' habit.pk %}"
+            class="bg-peach-100 text-peach-600 px-3 py-1 rounded-full text-sm hover:bg-peach-200 transition">
+            Mark Done
+        </a>
+        {% endif %}
+        <a href="{% url 'habit_delete' habit.pk %}"
+            class="bg-gray-100 text-gray-500 px-3 py-1 rounded-full text-sm hover:bg-gray-200 transition">
+            Delete
+        </a>
+    </div>
+</div>
+{% empty %}
+<div class="text-center py-16 text-gray-400">
+    <div class="text-5xl mb-4">🌱</div>
+    <p class="text-lg">No habits yet.</p>
+    <p class="text-sm mt-1">Add your first habit to start growing!</p>
+</div>
+{% endfor %}
+{% endblock %}

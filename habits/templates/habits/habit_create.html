@@ -1,0 +1,28 @@
+{% extends 'users/base.html' %}
+{% block title %}Add Habit - BetterMe{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto">
+    <div class="bg-white rounded-2xl shadow-sm border border-peach-100 p-8">
+        <h2 class="text-2xl font-bold text-gray-800 mb-1">Add a New Habit 🌱</h2>
+        <p class="text-gray-400 text-sm mb-6">What positive habit do you want to build?</p>
+
+        <form method="POST" class="space-y-4">
+            {% csrf_token %}
+            <div>
+                <label class="text-sm text-gray-600 block mb-1">Habit Name</label>
+                <input type="text" name="habit_name"
+                    placeholder="e.g. Exercise, Read, Meditate" required
+                    class="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-peach-400 transition">
+            </div>
+            <button type="submit"
+                class="w-full bg-peach-400 hover:bg-peach-500 text-white font-medium py-2 rounded-xl transition">
+                Add Habit
+            </button>
+        </form>
+        <div class="mt-4 text-center">
+            <a href="{% url 'habit_list' %}" class="text-sm text-gray-400 hover:text-peach-500">← Back to Habits</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

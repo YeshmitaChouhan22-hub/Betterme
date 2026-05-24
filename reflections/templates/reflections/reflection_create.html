@@ -1,0 +1,49 @@
+{% extends 'users/base.html' %}
+{% block title %}Daily Reflection - BetterMe{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto">
+    <div class="bg-white rounded-2xl shadow-sm border border-peach-100 p-8">
+        <h2 class="text-2xl font-bold text-gray-800 mb-1">Daily Reflection 🌿</h2>
+        <p class="text-gray-400 text-sm mb-6">Take a moment to check in with yourself</p>
+
+        <form method="POST" class="space-y-5">
+            {% csrf_token %}
+            <div>
+                <label class="text-sm text-gray-600 block mb-2">How are you feeling?</label>
+                <select name="emotion"
+                    class="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-peach-400 transition">
+                    <option value="happy">😊 Happy</option>
+                    <option value="calm">😌 Calm</option>
+                    <option value="stressed">😟 Stressed</option>
+                    <option value="motivated">💪 Motivated</option>
+                    <option value="tired">😴 Tired</option>
+                    <option value="peaceful">🕊️ Peaceful</option>
+                    <option value="emotional">🥹 Emotional</option>
+                    <option value="relaxed">😎 Relaxed</option>
+                </select>
+            </div>
+            <div>
+                <label class="text-sm text-gray-600 block mb-2">What did you mainly do today?</label>
+                <select name="activity"
+                    class="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-peach-400 transition">
+                    <option value="worked">💼 Worked</option>
+                    <option value="studied">📚 Studied</option>
+                    <option value="exercised">🏃 Exercised</option>
+                    <option value="rested">🛋️ Rested</option>
+                    <option value="watched_movies">🎬 Watched Movies</option>
+                    <option value="socialized">👯 Socialized</option>
+                    <option value="self_care">🛁 Self-care</option>
+                </select>
+            </div>
+            <button type="submit"
+                class="w-full bg-peach-400 hover:bg-peach-500 text-white font-medium py-2 rounded-xl transition">
+                Get My Affirmation 🌸
+            </button>
+        </form>
+        <div class="mt-4 text-center">
+            <a href="{% url 'reflection_list' %}" class="text-sm text-gray-400 hover:text-peach-500">← Back to Reflections</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

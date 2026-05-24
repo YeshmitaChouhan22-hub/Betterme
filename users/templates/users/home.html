@@ -1,11 +1,27 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Home - BetterMe</title>
-</head>
-<body>
-    <h2>Welcome to BetterMe 🌟</h2>
-    <p>Your personal growth journey starts here.</p>
-    <a href="{% url 'logout' %}">Logout</a>
-</body>
-</html>
+{% extends 'users/base.html' %}
+{% block title %}Home - BetterMe{% endblock %}
+
+{% block content %}
+<div class="text-center py-16">
+    <h1 class="text-4xl font-bold text-peach-500 mb-3">Welcome back, {{ request.user.username }} 🌸</h1>
+    <p class="text-gray-500 text-lg mb-10">What would you like to focus on today?</p>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+        <a href="{% url 'habit_list' %}" class="bg-white border border-peach-100 rounded-2xl p-6 shadow-sm hover:shadow-md hover:border-peach-300 transition text-left">
+            <div class="text-3xl mb-3">✅</div>
+            <h3 class="font-semibold text-gray-800 text-lg">My Habits</h3>
+            <p class="text-gray-400 text-sm mt-1">Track your daily streaks</p>
+        </a>
+        <a href="{% url 'journal_list' %}" class="bg-white border border-peach-100 rounded-2xl p-6 shadow-sm hover:shadow-md hover:border-peach-300 transition text-left">
+            <div class="text-3xl mb-3">📓</div>
+            <h3 class="font-semibold text-gray-800 text-lg">My Journal</h3>
+            <p class="text-gray-400 text-sm mt-1">Write your thoughts freely</p>
+        </a>
+        <a href="{% url 'reflection_list' %}" class="bg-white border border-peach-100 rounded-2xl p-6 shadow-sm hover:shadow-md hover:border-peach-300 transition text-left">
+            <div class="text-3xl mb-3">🌿</div>
+            <h3 class="font-semibold text-gray-800 text-lg">Daily Reflection</h3>
+            <p class="text-gray-400 text-sm mt-1">Log your mood and get an affirmation</p>
+        </a>
+    </div>
+</div>
+{% endblock %}

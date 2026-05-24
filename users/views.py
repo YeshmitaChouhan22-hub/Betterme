@@ -27,14 +27,16 @@ def register_view(request):
     return render(request, 'users/register.html')
 def login_view(request):
     if request.method == 'POST':
-        form = AuthenticationForm(data=request.POST)
-        if form.is_valid():
-            user = form.get_user()
+        username = request.POST['username']
+        password = request.POST['password']
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
             login(request, user)
             return redirect('home')
-    else:
-        form = AuthenticationForm()
-    return render(request, 'users/login.html', {'form': form})
+        else:
+            messages.error(request, 'Invalid username or password.')
+            return redirect('login')
+    return render(request, 'users/login.html')
 
 def logout_view(request):
     logout(request)
