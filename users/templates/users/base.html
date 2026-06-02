@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}BetterMe{% endblock %}</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
             theme: {
@@ -24,54 +25,212 @@
                             100: '#fdf6ec',
                             200: '#f9ead6',
                         }
+                    },
+                    fontFamily: {
+                        display: ['Playfair Display', 'serif'],
+                        body: ['DM Sans', 'sans-serif'],
                     }
                 }
             }
         }
     </script>
     <style>
-        body { background-color: #fffdf9; }
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background-color: #fffdf9;
+            background-image:
+                radial-gradient(ellipse at 10% 20%, rgba(255, 176, 136, 0.18) 0%, transparent 50%),
+                radial-gradient(ellipse at 90% 80%, rgba(249, 115, 64, 0.10) 0%, transparent 50%);
+            min-height: 100vh;
+        }
+
+        /* Navbar */
+        .navbar {
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            background: rgba(255, 253, 249, 0.85);
+            border-bottom: 1px solid rgba(255, 208, 176, 0.4);
+        }
+
+        .nav-link {
+            position: relative;
+            color: #6b7280;
+            font-size: 0.875rem;
+            font-weight: 400;
+            text-decoration: none;
+            padding-bottom: 2px;
+            transition: color 0.2s;
+        }
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 1.5px;
+            background: #f97340;
+            transition: width 0.25s ease;
+        }
+        .nav-link:hover { color: #f97340; }
+        .nav-link:hover::after { width: 100%; }
+        .nav-link.active { color: #f97340; }
+        .nav-link.active::after { width: 100%; }
+
+        /* Cards */
+        .card {
+            background: rgba(255, 255, 255, 0.75);
+            border: 1px solid rgba(255, 208, 176, 0.35);
+            border-radius: 1.25rem;
+            box-shadow: 0 2px 20px rgba(249, 115, 64, 0.06);
+            backdrop-filter: blur(8px);
+            transition: box-shadow 0.2s, transform 0.2s;
+        }
+        .card:hover {
+            box-shadow: 0 6px 30px rgba(249, 115, 64, 0.12);
+            transform: translateY(-2px);
+        }
+
+        /* Buttons */
+        .btn-primary {
+            background: linear-gradient(135deg, #f97340, #e05a28);
+            color: white;
+            border-radius: 9999px;
+            padding: 0.5rem 1.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: opacity 0.2s, transform 0.15s;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+
+        .btn-ghost {
+            background: rgba(255, 232, 214, 0.5);
+            color: #e05a28;
+            border-radius: 9999px;
+            padding: 0.4rem 1.2rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: background 0.2s;
+            border: 1px solid rgba(255, 176, 136, 0.3);
+        }
+        .btn-ghost:hover { background: rgba(255, 208, 176, 0.6); }
+
+        /* Form inputs */
+        .input-field {
+            width: 100%;
+            padding: 0.65rem 1rem;
+            border: 1.5px solid rgba(255, 176, 136, 0.4);
+            border-radius: 0.75rem;
+            background: rgba(255, 253, 249, 0.9);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.9rem;
+            color: #374151;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            outline: none;
+        }
+        .input-field:focus {
+            border-color: #f97340;
+            box-shadow: 0 0 0 3px rgba(249, 115, 64, 0.12);
+        }
+
+        /* Toast messages */
+        .toast {
+            animation: slideDown 0.35s ease forwards;
+        }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Page fade in */
+        main {
+            animation: fadeUp 0.4s ease forwards;
+        }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(12px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Section headings */
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.75rem;
+            color: #1f2937;
+            font-weight: 600;
+        }
+
+        /* Footer */
+        footer {
+            border-top: 1px solid rgba(255, 208, 176, 0.3);
+            color: #9ca3af;
+            font-size: 0.8rem;
+            text-align: center;
+            padding: 1.5rem;
+            margin-top: 4rem;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #fff8f3; }
+        ::-webkit-scrollbar-thumb { background: #ffd0b0; border-radius: 9999px; }
     </style>
 </head>
-<body class="min-h-screen font-sans text-gray-800">
+<body>
 
-    <!-- Navbar -->
-    <nav class="bg-white border-b border-peach-100 shadow-sm px-6 py-4">
-        <div class="max-w-4xl mx-auto flex justify-between items-center">
-            <a href="{% url 'home' %}" class="text-xl font-bold text-peach-500 tracking-tight">
-                🌸 BetterMe
+    <!-- Sticky Navbar -->
+    <nav class="navbar sticky top-0 z-50 px-6 py-4">
+        <div class="max-w-5xl mx-auto flex justify-between items-center">
+
+            <a href="{% url 'home' %}" class="flex items-center gap-2">
+                <span class="text-2xl">🌸</span>
+                <span style="font-family:'Playfair Display',serif; font-size:1.2rem; font-weight:600; color:#f97340;">BetterMe</span>
             </a>
+
             {% if request.user.is_authenticated %}
-            <div class="flex items-center gap-6 text-sm text-gray-600">
-                <a href="{% url 'dashboard' %}" class="hover:text-peach-500 transition">Dashboard</a>
-                <a href="{% url 'habit_list' %}" class="hover:text-peach-500 transition">Habits</a>
-                <a href="{% url 'journal_list' %}" class="hover:text-peach-500 transition">Journal</a>
-                <a href="{% url 'reflection_list' %}" class="hover:text-peach-500 transition">Reflect</a>
-                <span class="text-gray-400">|</span>
-                <span class="text-gray-500">Hi, {{ request.user.username }} 👋</span>
-                <a href="{% url 'logout' %}" class="bg-peach-100 text-peach-600 px-3 py-1 rounded-full hover:bg-peach-200 transition">Logout</a>
+            <div class="flex items-center gap-6">
+                <a href="{% url 'dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">Dashboard</a>
+                <a href="{% url 'habit_list' %}" class="nav-link {% if request.resolver_match.url_name == 'habit_list' %}active{% endif %}">Habits</a>
+                <a href="{% url 'journal_list' %}" class="nav-link {% if request.resolver_match.url_name == 'journal_list' %}active{% endif %}">Journal</a>
+                <a href="{% url 'reflection_list' %}" class="nav-link {% if request.resolver_match.url_name == 'reflection_list' %}active{% endif %}">Reflect</a>
+                <a href="{% url 'weekly_report' %}" class="nav-link {% if request.resolver_match.url_name == 'weekly_report' %}active{% endif %}">Weekly Report</a>
+                <div class="flex items-center gap-3 ml-2 pl-4 border-l border-peach-100">
+                    <span class="text-sm text-gray-400">Hi, <span class="text-gray-600 font-medium">{{ request.user.username }}</span> 👋</span>
+                    <a href="{% url 'logout' %}" class="btn-ghost">Logout</a>
+                </div>
             </div>
             {% else %}
-            <div class="flex gap-4 text-sm">
-                <a href="{% url 'login' %}" class="hover:text-peach-500 transition">Login</a>
-                <a href="{% url 'register' %}" class="bg-peach-400 text-white px-4 py-1 rounded-full hover:bg-peach-500 transition">Register</a>
+            <div class="flex items-center gap-4">
+                <a href="{% url 'login' %}" class="nav-link">Login</a>
+                <a href="{% url 'register' %}" class="btn-primary">Get Started</a>
             </div>
             {% endif %}
         </div>
     </nav>
 
-    <!-- Page Content -->
-    <main class="max-w-4xl mx-auto px-6 py-10">
-        {% if messages %}
-            {% for message in messages %}
-            <div class="mb-4 px-4 py-3 rounded-lg bg-peach-100 text-peach-600 text-sm">
-                {{ message }}
-            </div>
-            {% endfor %}
-        {% endif %}
+    <!-- Toast Messages -->
+    {% if messages %}
+    <div class="max-w-5xl mx-auto px-6 pt-4">
+        {% for message in messages %}
+        <div class="toast mb-3 flex items-center gap-3 px-5 py-3 rounded-xl bg-white border border-peach-100 shadow-sm text-sm text-gray-700">
+            <span class="text-peach-400">✦</span>
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
 
+    <!-- Main Content -->
+    <main class="max-w-5xl mx-auto px-6 py-10">
         {% block content %}{% endblock %}
     </main>
+
+    <!-- Footer -->
+    <footer>
+        Made with 🌸 · BetterMe &copy; 2025
+    </footer>
 
 </body>
 </html>

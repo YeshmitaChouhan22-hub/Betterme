@@ -1,114 +1,136 @@
 {% extends 'users/base.html' %}
-{% block title %}Dashboard - BetterMe{% endblock %}
+{% block title %}Dashboard — BetterMe{% endblock %}
 
 {% block content %}
-<div class="mb-8">
-    <h1 class="text-2xl font-bold text-gray-800">Your Dashboard 📊</h1>
-    <p class="text-gray-400 text-sm mt-1">A look at your growth journey so far</p>
-</div>
-
-<!-- Stats Cards -->
-<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
-    <div class="bg-white border border-peach-100 rounded-2xl p-5 shadow-sm text-center">
-        <div class="text-3xl font-bold text-peach-400">{{ total_habits }}</div>
-        <div class="text-sm text-gray-400 mt-1">Total Habits</div>
+<!-- Top Header Area -->
+<div class="mb-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+    <div>
+        <h1 class="section-title">Your Progress Hub</h1>
+        <p class="text-gray-500 text-sm font-body mt-1">Real-time indicators tracking your intentional daily growth habits.</p>
     </div>
-    <div class="bg-white border border-peach-100 rounded-2xl p-5 shadow-sm text-center">
-        <div class="text-3xl font-bold text-peach-400">{{ completed_habits }}</div>
-        <div class="text-sm text-gray-400 mt-1">Completed Today</div>
-    </div>
-    <div class="bg-white border border-peach-100 rounded-2xl p-5 shadow-sm text-center">
-        <div class="text-3xl font-bold text-peach-400">{{ total_journals }}</div>
-        <div class="text-sm text-gray-400 mt-1">Journal Entries</div>
-    </div>
-    <div class="bg-white border border-peach-100 rounded-2xl p-5 shadow-sm text-center">
-        <div class="text-3xl font-bold text-peach-400">🔥 {{ top_streak }}</div>
-        <div class="text-sm text-gray-400 mt-1">Top Streak</div>
+    <div class="text-sm font-body text-gray-400 bg-cream-100 px-4 py-2 rounded-full border border-peach-100">
+        ✨ Today is <span class="text-peach-600 font-medium">{% now "A, F j" %}</span>
     </div>
 </div>
 
-<!-- Charts -->
-<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<!-- Premium Metrics Card Row Grid -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+    <div class="card p-6">
+        <p class="text-xs font-medium text-gray-400 uppercase tracking-widest font-body">Current Top Streak</p>
+        <p class="text-3xl font-bold font-display text-peach-500 mt-2">🔥 {{ top_streak }} Days</p>
+    </div>
+    
+    <div class="card p-6">
+        <p class="text-xs font-medium text-gray-400 uppercase tracking-widest font-body">Habit Completion</p>
+        <p class="text-3xl font-bold font-display text-gray-800 mt-2">✅ {{ completed_habits }} <span class="text-xl font-normal text-gray-400">/ {{ total_habits }}</span></p>
+    </div>
+    
+    <div class="card p-6">
+        <p class="text-xs font-medium text-gray-400 uppercase tracking-widest font-body">Journal Logs</p>
+        <p class="text-3xl font-bold font-display text-gray-800 mt-2">📓 {{ total_journals }} Entries</p>
+    </div>
+    
+    <div class="card p-6">
+        <p class="text-xs font-medium text-gray-400 uppercase tracking-widest font-body">Reflections Logged</p>
+        <p class="text-3xl font-bold font-display text-gray-800 mt-2">🌿 {{ total_reflections }} Days</p>
+    </div>
+</div>
 
-    <!-- Mood Chart -->
-    <div class="bg-white border border-peach-100 rounded-2xl p-6 shadow-sm">
-        <h3 class="font-semibold text-gray-700 mb-4">Mood Frequency 🌿</h3>
-        {% if mood_labels %}
-        <canvas id="moodChart" height="200"></canvas>
-        {% else %}
-        <div class="text-center py-10 text-gray-300">
-            <p>No reflections yet</p>
-            <a href="{% url 'reflection_create' %}" class="text-peach-400 text-sm hover:underline">Log your first one</a>
+<!-- Main Split Canvas Layout Section -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+    
+    <!-- Left Hand Side: Mood Breakdown Graph -->
+    <div class="card p-6 lg:col-span-2">
+        <div class="flex justify-between items-center mb-6">
+            <div>
+                <h3 class="font-display font-semibold text-lg text-gray-800">Mood & Sentiment Trends</h3>
+                <p class="text-xs text-gray-400 font-body">Visualized tracking of emotion logs</p>
+            </div>
         </div>
+        
+        {% if chart_labels %}
+            <!-- Canvas target wrapper container -->
+            <div class="relative w-full h-64">
+                <canvas id="moodChart"></canvas>
+            </div>
+        {% else %}
+            <!-- Graceful Null / Empty State Handling UI -->
+            <div class="flex flex-col items-center justify-center py-16 text-center">
+                <span class="text-4xl mb-3">💭</span>
+                <p class="text-sm font-body text-gray-400 max-w-xs">No mood metrics available yet. Submit a new reflection entry to unlock visual tracking components.</p>
+                <a href="{% url 'reflection_list' %}" class="btn-ghost mt-4 text-xs">Log Your Mood</a>
+            </div>
         {% endif %}
     </div>
 
-    <!-- Habit Streaks Chart -->
-    <div class="bg-white border border-peach-100 rounded-2xl p-6 shadow-sm">
-        <h3 class="font-semibold text-gray-700 mb-4">Habit Streaks 🔥</h3>
-        {% if habit_labels %}
-        <canvas id="habitChart" height="200"></canvas>
-        {% else %}
-        <div class="text-center py-10 text-gray-300">
-            <p>No habits yet</p>
-            <a href="{% url 'habit_create' %}" class="text-peach-400 text-sm hover:underline">Add your first habit</a>
+    <!-- Right Hand Side: Action Workspace Toolbox Panel -->
+    <div class="card p-6 border-l-2 border-l-peach-300">
+        <h3 class="font-display font-semibold text-lg text-gray-800 mb-2">Workspace Toolbelt</h3>
+        <p class="text-xs font-body text-gray-400 mb-6">Quickly jump into alternative active workspace environments.</p>
+        
+        <div class="space-y-3 font-body">
+            <a href="{% url 'habit_list' %}" class="flex items-center justify-between w-full text-left bg-cream-50 border border-peach-100 text-gray-700 p-3 rounded-xl hover:border-peach-300 transition text-sm shadow-sm group">
+                <span>🎯 Actionable Habits</span>
+                <span class="text-gray-300 group-hover:text-peach-400 transition">&rarr;</span>
+            </a>
+            
+            <a href="{% url 'journal_list' %}" class="flex items-center justify-between w-full text-left bg-cream-50 border border-peach-100 text-gray-700 p-3 rounded-xl hover:border-peach-300 transition text-sm shadow-sm group">
+                <span>📝 Write Journal Log</span>
+                <span class="text-gray-300 group-hover:text-peach-400 transition">&rarr;</span>
+            </a>
+            
+            <a href="{% url 'reflection_list' %}" class="flex items-center justify-between w-full text-left bg-peach-500 text-white p-3 rounded-xl hover:bg-peach-600 transition text-sm shadow-md font-medium group">
+                <span>✨ New Self Reflection</span>
+                <span class="text-peach-200 group-hover:text-white transition">&rarr;</span>
+            </a>
         </div>
-        {% endif %}
     </div>
-
 </div>
 
+<!-- ChartJS Execution Integration Layer -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    {% if mood_labels %}
-    const moodCtx = document.getElementById('moodChart').getContext('2d');
-    new Chart(moodCtx, {
-        type: 'doughnut',
-        data: {
-            labels: {{ mood_labels|safe }},
-            datasets: [{
-                data: {{ mood_data|safe }},
-                backgroundColor: [
-                    '#ffb088', '#ffd0b0', '#ff8c5a',
-                    '#f97340', '#ffe8d6', '#fdf6ec', '#fff8f3'
-                ],
-                borderWidth: 0,
-            }]
-        },
-        options: {
-            plugins: {
-                legend: { position: 'bottom', labels: { font: { size: 12 } } }
-            }
-        }
-    });
-    {% endif %}
-
-    {% if habit_labels %}
-    const habitCtx = document.getElementById('habitChart').getContext('2d');
-    new Chart(habitCtx, {
-        type: 'bar',
-        data: {
-            labels: {{ habit_labels|safe }},
-            datasets: [{
-                label: 'Streak (days)',
-                data: {{ habit_streaks|safe }},
-                backgroundColor: '#ffb088',
-                borderRadius: 8,
-                borderWidth: 0,
-            }]
-        },
-        options: {
-            plugins: { legend: { display: false } },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: { stepSize: 1 },
-                    grid: { color: '#fdf6ec' }
+    document.addEventListener("DOMContentLoaded", function() {
+        const ctx = document.getElementById('moodChart');
+        if (ctx) {
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: {{ chart_labels|safe }},
+                    datasets: [{
+                        label: 'Days Logged',
+                        data: {{ chart_data|safe }},
+                        backgroundColor: 'rgba(255, 176, 136, 0.65)',
+                        borderColor: '#f97340',
+                        borderWidth: 1.5,
+                        borderRadius: 8,
+                        borderSkipped: false
+                    }]
                 },
-                x: { grid: { display: false } }
-            }
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: { font: { family: 'DM Sans', size: 11 }, color: '#9ca3af' }
+                        },
+                        y: {
+                            grid: { color: 'rgba(255, 208, 176, 0.15)' },
+                            beginAtZero: true,
+                            ticks: { 
+                                stepSize: 1,
+                                font: { family: 'DM Sans', size: 11 }, 
+                                color: '#9ca3af' 
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
         }
     });
-    {% endif %}
 </script>
 {% endblock %}

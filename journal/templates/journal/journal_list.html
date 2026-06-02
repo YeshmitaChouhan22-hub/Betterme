@@ -20,7 +20,11 @@
         <a href="{% url 'journal_delete' entry.pk %}"
             class="text-xs text-gray-300 hover:text-red-400 transition">Delete</a>
     </div>
-    <p class="text-gray-700 leading-relaxed">{{ entry.content }}</p>
+    <p class="text-gray-700 leading-relaxed mb-4">{{ entry.content }}</p>
+    <a href="{% url 'journal_chat' entry.pk %}"
+        class="inline-flex items-center gap-2 bg-peach-50 hover:bg-peach-100 text-peach-500 text-sm px-4 py-2 rounded-xl transition border border-peach-200">
+        🌸 Talk to AI about this entry
+    </a>
 </div>
 {% empty %}
 <div class="text-center py-16 text-gray-400">

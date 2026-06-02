@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+
 class DailyReflection(models.Model):
     EMOTION_CHOICES = [
         ('happy', 'Happy'),
@@ -31,3 +32,14 @@ class DailyReflection(models.Model):
 
     def __str__(self):
         return f"{self.user.username} felt {self.emotion} on {self.created_at.strftime('%Y-%m-%d')}"
+
+
+class WeeklyReport(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    report_text = models.TextField()
+    week_start = models.DateField()
+    week_end = models.DateField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.week_end}"

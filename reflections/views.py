@@ -1,6 +1,14 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
-from .models import DailyReflection
+from django.http import JsonResponse
+from django.utils import timezone
+from django.conf import settings
+from .models import DailyReflection, WeeklyReport
+from journal.models import JournalEntry
+from habits.models import Habit
+import httpx
+import groq
+import datetime
 
 AFFIRMATIONS = {
     ('happy', 'worked'): "You brought joy to everything you did today 🌟",
@@ -63,12 +71,93 @@ AFFIRMATIONS = {
 
 DEFAULT_AFFIRMATION = "Every single day you show up for yourself is a victory 🌟"
 
+
+def generate_weekly_report(user):
+    today = timezone.now().date()
+    week_start = today - datetime.timedelta(days=7)
+
+    reflections = DailyReflection.objects.filter(
+        user=user,
+        created_at__date__gte=week_start
+    )
+    journals = JournalEntry.objects.filter(
+        user=user,
+        created_at__date__gte=week_start
+    )
+    habits = Habit.objects.filter(user=user)
+
+    reflection_summary = ""
+    for r in reflections:
+        reflection_summary += f"- Felt {r.emotion}, activity: {r.activity} on {r.created_at.strftime('%A')}\n"
+
+    journal_summary = ""
+    for j in journals:
+        journal_summary += f"- {j.created_at.strftime('%A')}: {j.content[:200]}...\n"
+
+    habit_summary = ""
+    for h in habits:
+        habit_summary += f"- {h.habit_name}: {h.streak_count} day streak, completed: {h.is_completed}\n"
+
+    if not reflection_summary and not journal_summary:
+        return None
+
+    prompt = f"""You are an empathetic AI wellness analyst for an app called BetterMe.
+
+Analyse this user's past 7 days of data and write a warm, personal weekly report.
+
+MOOD AND ACTIVITY LOG:
+{reflection_summary if reflection_summary else "No reflections logged this week."}
+
+JOURNAL ENTRIES:
+{journal_summary if journal_summary else "No journal entries this week."}
+
+HABIT TRACKING:
+{habit_summary if habit_summary else "No habits tracked."}
+
+Write a weekly report with exactly these 3 sections:
+
+1. PATTERNS THIS WEEK
+Identify 2-3 emotional or behavioural patterns you notice. Be specific and warm.
+
+2. WHAT THIS TELLS US
+What do these patterns reveal about this person's current life situation? Be insightful and empathetic.
+
+3. THREE SUGGESTIONS FOR NEXT WEEK
+Give 3 specific, actionable, personalised suggestions based on the data. Not generic advice — make it specific to what you see.
+
+Keep the entire report under 300 words. Write directly to the user using "you". Be warm, encouraging, and never clinical."""
+
+    client = groq.Groq(
+        api_key=settings.GROQ_API_KEY,
+        http_client=httpx.Client(verify=False)
+    )
+
+    response = client.chat.completions.create(
+        model="llama-3.3-70b-versatile",
+        messages=[{"role": "user", "content": prompt}],
+        max_tokens=500,
+        temperature=0.7,
+    )
+
+    report_text = response.choices[0].message.content
+
+    WeeklyReport.objects.create(
+        user=user,
+        report_text=report_text,
+        week_start=week_start,
+        week_end=today
+    )
+
+    return report_text
+
+
 @login_required
 def reflection_list(request):
     reflections = DailyReflection.objects.filter(
         user=request.user).order_by('-created_at')
     return render(request, 'reflections/reflection_list.html',
                   {'reflections': reflections})
+
 
 @login_required
 def reflection_create(request):
@@ -86,8 +175,27 @@ def reflection_create(request):
         return redirect('reflection_result', pk=reflection.pk)
     return render(request, 'reflections/reflection_create.html')
 
+
 @login_required
 def reflection_result(request, pk):
     reflection = DailyReflection.objects.get(pk=pk, user=request.user)
     return render(request, 'reflections/reflection_result.html',
                   {'reflection': reflection})
+
+
+@login_required
+def weekly_report(request):
+    past_reports = WeeklyReport.objects.filter(
+        user=request.user).order_by('-created_at')
+
+    if request.method == 'POST':
+        report_text = generate_weekly_report(request.user)
+        if report_text is None:
+            return JsonResponse({
+                'error': 'Not enough data yet. Log some moods and journal entries first!'
+            }, status=400)
+        return JsonResponse({'report': report_text})
+
+    return render(request, 'reflections/weekly_report.html', {
+        'past_reports': past_reports
+    })
