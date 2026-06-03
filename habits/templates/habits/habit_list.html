@@ -1,50 +1,37 @@
 {% extends 'users/base.html' %}
 {% block title %}My Habits - BetterMe{% endblock %}
-
 {% block content %}
 <div class="flex justify-between items-center mb-8">
     <div>
-        <h1 class="text-2xl font-bold text-gray-800">My Habits ✅</h1>
-        <p class="text-gray-400 text-sm mt-1">Small steps every day lead to big change</p>
+        <h1 class="text-2xl font-bold text-charcoal-100">My Habits</h1>
+        <p class="text-charcoal-400 text-sm mt-1">Small steps every day lead to big change</p>
     </div>
-    <a href="{% url 'habit_create' %}"
-        class="bg-peach-400 hover:bg-peach-500 text-white px-4 py-2 rounded-xl text-sm transition">
-        + Add Habit
-    </a>
+    <a href="{% url 'habit_create' %}" class="bg-amber-500 hover:bg-amber-400 text-charcoal-900 px-4 py-2 rounded-xl text-sm font-medium transition">+ Add Habit</a>
 </div>
-
 {% for habit in habits %}
-<div class="bg-white border border-peach-100 rounded-2xl p-5 mb-4 shadow-sm flex justify-between items-center">
+<div class="bg-charcoal-800 border border-charcoal-700 rounded-2xl p-5 mb-4 flex justify-between items-center">
     <div>
-        <h3 class="font-semibold text-gray-800">{{ habit.habit_name }}</h3>
-        <p class="text-sm text-gray-400 mt-1">
-            🔥 {{ habit.streak_count }} day streak
-            &nbsp;·&nbsp;
+        <h3 class="font-semibold text-charcoal-100">{{ habit.habit_name }}</h3>
+        <p class="text-sm text-charcoal-400 mt-1">
+            {{ habit.streak_count }} day streak &nbsp;·&nbsp;
             {% if habit.is_completed %}
-                <span class="text-green-500">Completed today ✅</span>
+                <span class="text-green-400">Done today</span>
             {% else %}
-                <span class="text-peach-400">Pending ⏳</span>
+                <span class="text-amber-400">Pending</span>
             {% endif %}
         </p>
     </div>
     <div class="flex gap-3">
         {% if not habit.is_completed %}
-        <a href="{% url 'habit_complete' habit.pk %}"
-            class="bg-peach-100 text-peach-600 px-3 py-1 rounded-full text-sm hover:bg-peach-200 transition">
-            Mark Done
-        </a>
+        <a href="{% url 'habit_complete' habit.pk %}" class="bg-amber-500 hover:bg-amber-400 text-charcoal-900 px-3 py-1 rounded-full text-sm font-medium transition">Mark Done</a>
         {% endif %}
-        <a href="{% url 'habit_delete' habit.pk %}"
-            class="bg-gray-100 text-gray-500 px-3 py-1 rounded-full text-sm hover:bg-gray-200 transition">
-            Delete
-        </a>
+        <a href="{% url 'habit_delete' habit.pk %}" class="bg-charcoal-700 text-charcoal-400 px-3 py-1 rounded-full text-sm hover:bg-charcoal-600 transition">Delete</a>
     </div>
 </div>
 {% empty %}
-<div class="text-center py-16 text-gray-400">
-    <div class="text-5xl mb-4">🌱</div>
+<div class="text-center py-16 text-charcoal-500">
     <p class="text-lg">No habits yet.</p>
-    <p class="text-sm mt-1">Add your first habit to start growing!</p>
+    <p class="text-sm mt-1">Add your first habit to start growing.</p>
 </div>
 {% endfor %}
 {% endblock %}

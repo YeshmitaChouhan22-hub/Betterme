@@ -4,43 +4,43 @@
 {% block content %}
 <div class="max-w-2xl mx-auto">
 
-    <div class="bg-white border border-peach-100 rounded-2xl p-5 mb-6 shadow-sm">
-        <p class="text-xs text-gray-400 mb-2">📅 Your journal entry</p>
+    <div class="card p-5 mb-6">
+        <p class="text-xs text-gray-400 mb-2">Your journal entry</p>
         <p class="text-gray-600 text-sm leading-relaxed">{{ entry.content }}</p>
     </div>
 
-    <div class="bg-white border border-peach-100 rounded-2xl shadow-sm overflow-hidden">
-        <div class="px-5 py-4 border-b border-peach-100 flex items-center gap-3">
-            <div class="w-8 h-8 rounded-full bg-peach-100 flex items-center justify-center text-sm">🌸</div>
+    <div class="card overflow-hidden">
+        <div class="px-5 py-4 border-b border-gray-100 flex items-center gap-3">
+            <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-sm font-bold text-gray-500">AI</div>
             <div>
                 <p class="font-semibold text-gray-800 text-sm">BetterMe AI</p>
                 <p class="text-xs text-gray-400">Your journaling companion</p>
             </div>
         </div>
 
-        <div id="chat-messages" class="px-5 py-4 space-y-4 min-h-64 max-h-96 overflow-y-auto">
+        <div id="chat-messages" class="px-5 py-4 space-y-4 overflow-y-auto" style="min-height:16rem;max-height:24rem;background:#fafafa;">
             {% if not conversations %}
             <div class="text-center py-8">
-                <p class="text-gray-400 text-sm">I've read your journal entry. I'm here to listen. 🌿</p>
-                <p class="text-gray-300 text-xs mt-1">Ask me anything or just share what's on your mind.</p>
+                <p class="text-gray-400 text-sm">I have read your journal entry. I am here to listen.</p>
+                <p class="text-gray-300 text-xs mt-1">Ask me anything or just share what is on your mind.</p>
             </div>
             {% endif %}
 
             {% for conv in conversations %}
             <div class="flex justify-end">
-                <div class="bg-peach-400 text-white px-4 py-2 rounded-2xl rounded-tr-sm text-sm max-w-xs">
+                <div class="text-white px-4 py-2 rounded-2xl rounded-tr-sm text-sm max-w-xs" style="background:#f97340;">
                     {{ conv.user_message }}
                 </div>
             </div>
             <div class="flex justify-start">
-                <div class="bg-gray-50 border border-gray-100 text-gray-700 px-4 py-2 rounded-2xl rounded-tl-sm text-sm max-w-sm">
+                <div class="bg-white border border-gray-100 text-gray-700 px-4 py-2 rounded-2xl rounded-tl-sm text-sm max-w-sm shadow-sm">
                     {{ conv.ai_response }}
                 </div>
             </div>
             {% endfor %}
 
             <div id="typing-indicator" class="flex justify-start hidden">
-                <div class="bg-gray-50 border border-gray-100 px-4 py-3 rounded-2xl rounded-tl-sm">
+                <div class="bg-white border border-gray-100 px-4 py-3 rounded-2xl rounded-tl-sm shadow-sm">
                     <div class="flex gap-1">
                         <div class="w-2 h-2 rounded-full bg-gray-300 animate-bounce"></div>
                         <div class="w-2 h-2 rounded-full bg-gray-300 animate-bounce" style="animation-delay:0.15s"></div>
@@ -50,21 +50,18 @@
             </div>
         </div>
 
-        <div class="px-5 py-4 border-t border-peach-100">
+        <div class="px-5 py-4 border-t border-gray-100">
             <div class="flex gap-3">
                 <input type="text" id="user-input"
                     placeholder="Share your thoughts..."
-                    class="flex-1 border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-peach-400 transition">
-                <button onclick="sendMessage()"
-                    class="bg-peach-400 hover:bg-peach-500 text-white px-4 py-2 rounded-xl text-sm transition font-medium">
-                    Send
-                </button>
+                    class="input-field flex-1">
+                <button onclick="sendMessage()" class="btn-primary px-5">Send</button>
             </div>
         </div>
     </div>
 
     <div class="mt-4 text-center">
-        <a href="{% url 'journal_list' %}" class="text-sm text-gray-400 hover:text-peach-500">← Back to Journal</a>
+        <a href="{% url 'journal_list' %}" class="text-sm text-gray-400 hover:text-peach-500">Back to Journal</a>
     </div>
 </div>
 
@@ -74,16 +71,14 @@ const csrfToken = "{{ csrf_token }}";
 const messagesDiv = document.getElementById('chat-messages');
 const typingIndicator = document.getElementById('typing-indicator');
 
-function scrollToBottom() {
-    messagesDiv.scrollTop = messagesDiv.scrollHeight;
-}
+function scrollToBottom() { messagesDiv.scrollTop = messagesDiv.scrollHeight; }
 
 function addMessage(text, isUser) {
     const div = document.createElement('div');
     div.className = isUser ? 'flex justify-end' : 'flex justify-start';
     div.innerHTML = isUser
-        ? `<div class="bg-peach-400 text-white px-4 py-2 rounded-2xl rounded-tr-sm text-sm max-w-xs">${text}</div>`
-        : `<div class="bg-gray-50 border border-gray-100 text-gray-700 px-4 py-2 rounded-2xl rounded-tl-sm text-sm max-w-sm">${text}</div>`;
+        ? `<div style="background:#f97340" class="text-white px-4 py-2 rounded-2xl rounded-tr-sm text-sm max-w-xs">${text}</div>`
+        : `<div class="bg-white border border-gray-100 text-gray-700 px-4 py-2 rounded-2xl rounded-tl-sm text-sm max-w-sm shadow-sm">${text}</div>`;
     messagesDiv.insertBefore(div, typingIndicator);
     scrollToBottom();
 }
@@ -92,37 +87,26 @@ async function sendMessage() {
     const input = document.getElementById('user-input');
     const message = input.value.trim();
     if (!message) return;
-
     input.value = '';
     addMessage(message, true);
-
     typingIndicator.classList.remove('hidden');
     scrollToBottom();
-
     try {
         const response = await fetch(chatUrl, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': csrfToken,
-            },
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
             body: JSON.stringify({ message: message })
         });
-
         const data = await response.json();
         typingIndicator.classList.add('hidden');
         addMessage(data.response, false);
-
     } catch (error) {
         typingIndicator.classList.add('hidden');
         addMessage('Something went wrong. Please try again.', false);
     }
 }
 
-document.getElementById('user-input').addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') sendMessage();
-});
-
+document.getElementById('user-input').addEventListener('keypress', e => { if (e.key === 'Enter') sendMessage(); });
 scrollToBottom();
 </script>
 {% endblock %}

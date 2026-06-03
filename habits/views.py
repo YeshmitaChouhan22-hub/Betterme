@@ -1,10 +1,13 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from .models import Habit
+from django.utils import timezone
+from .models import Habit, HabitLog
 
 @login_required
 def habit_list(request):
     habits = Habit.objects.filter(user=request.user)
+    for habit in habits:
+        habit.check_and_reset()
     return render(request, 'habits/habit_list.html', {'habits': habits})
 
 @login_required
@@ -18,9 +21,13 @@ def habit_create(request):
 @login_required
 def habit_complete(request, pk):
     habit = get_object_or_404(Habit, pk=pk, user=request.user)
-    habit.is_completed = True
-    habit.streak_count += 1
-    habit.save()
+    today = timezone.now().date()
+    if not habit.is_completed:
+        habit.is_completed = True
+        habit.streak_count += 1
+        habit.last_completed_date = today
+        habit.save()
+        HabitLog.objects.get_or_create(habit=habit, completed_on=today)
     return redirect('habit_list')
 
 @login_required

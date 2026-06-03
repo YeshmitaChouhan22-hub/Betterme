@@ -139,7 +139,11 @@ Keep the entire report under 300 words. Write directly to the user using "you". 
         temperature=0.7,
     )
 
+    import re
     report_text = response.choices[0].message.content
+    report_text = re.sub(r'#{1,3}\s*', '', report_text)
+    report_text = re.sub(r'\*\*(.*?)\*\*', r'\1', report_text)
+    report_text = report_text.strip()
 
     WeeklyReport.objects.create(
         user=user,
@@ -185,6 +189,14 @@ def reflection_result(request, pk):
 
 @login_required
 def weekly_report(request):
+    from django.utils import timezone
+    import datetime
+
+    WeeklyReport.objects.filter(
+        user=request.user,
+        created_at__lt=timezone.now() - datetime.timedelta(hours=24)
+    ).delete()
+
     past_reports = WeeklyReport.objects.filter(
         user=request.user).order_by('-created_at')
 

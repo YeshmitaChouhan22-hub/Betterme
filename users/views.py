@@ -6,6 +6,8 @@ from django.contrib import messages
 from habits.models import Habit
 from journal.models import JournalEntry
 from reflections.models import DailyReflection
+from django.utils import timezone
+import datetime
 
 def register_view(request):
     if request.method == 'POST':
@@ -28,7 +30,7 @@ def login_view(request):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
-            return redirect('home')
+            return redirect('dashboard')
         else:
             messages.error(request, 'Invalid username or password.')
             return redirect('login')
@@ -43,6 +45,11 @@ def home_view(request):
 
 @login_required
 def dashboard_view(request):
+    from habits.models import Habit, HabitLog
+    from journal.models import JournalEntry
+    from reflections.models import DailyReflection
+    import datetime
+
     habits = Habit.objects.filter(user=request.user)
     journals = JournalEntry.objects.filter(user=request.user)
     reflections = DailyReflection.objects.filter(user=request.user)
@@ -56,12 +63,34 @@ def dashboard_view(request):
     mood_counts = {}
     for r in reflections:
         mood_counts[r.emotion] = mood_counts.get(r.emotion, 0) + 1
-
     mood_labels = list(mood_counts.keys())
     mood_data = list(mood_counts.values())
 
-    habit_labels = [h.habit_name for h in habits]
-    habit_streaks = [h.streak_count for h in habits]
+    today = timezone.now().date()
+    last_7_days = [today - datetime.timedelta(days=i) for i in range(6, -1, -1)]
+    day_labels = [d.strftime('%a') for d in last_7_days]
+
+    consistency_data = []
+    for day in last_7_days:
+        if total_habits == 0:
+            consistency_data.append(0)
+        else:
+            completed_count = HabitLog.objects.filter(
+                habit__user=request.user,
+                completed_on=day
+            ).count()
+            percentage = round((completed_count / total_habits) * 100)
+            consistency_data.append(percentage)
+
+    emotion_by_date = {}
+    for r in reflections:
+        date_str = r.created_at.strftime('%Y-%m-%d')
+        emotion_by_date[date_str] = r.emotion
+
+    journal_by_date = {}
+    for j in journals:
+        date_str = j.created_at.strftime('%Y-%m-%d')
+        journal_by_date[date_str] = j.content[:200]
 
     context = {
         'total_habits': total_habits,
@@ -71,7 +100,9 @@ def dashboard_view(request):
         'top_streak': top_streak,
         'mood_labels': mood_labels,
         'mood_data': mood_data,
-        'habit_labels': habit_labels,
-        'habit_streaks': habit_streaks,
+        'day_labels': day_labels,
+        'consistency_data': consistency_data,
+        'emotion_by_date': emotion_by_date,
+        'journal_by_date': journal_by_date,
     }
     return render(request, 'users/dashboard.html', context)

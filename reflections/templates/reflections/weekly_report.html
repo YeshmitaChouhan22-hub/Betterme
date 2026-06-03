@@ -1,106 +1,75 @@
 {% extends 'users/base.html' %}
 {% block title %}Weekly Report - BetterMe{% endblock %}
-
 {% block content %}
 <div class="max-w-2xl mx-auto">
-
     <div class="mb-8">
-        <h1 class="text-2xl font-bold text-gray-800">Your Weekly Report 📊</h1>
+        <h1 class="section-title">Weekly Report</h1>
         <p class="text-gray-400 text-sm mt-1">AI analysis of your past 7 days</p>
     </div>
-
-    <div class="bg-white border border-peach-100 rounded-2xl p-6 shadow-sm mb-6">
-        <p class="text-gray-600 text-sm mb-4">The AI will analyse your mood logs, journal entries, and habit data from the past 7 days and generate a personalised report with patterns and suggestions.</p>
-        <button onclick="generateReport()"
-            id="generate-btn"
-            class="bg-peach-400 hover:bg-peach-500 text-white font-medium px-6 py-2 rounded-xl transition">
-            Generate My Weekly Report 🌸
+    <div class="card p-6 mb-6">
+        <p class="text-gray-500 text-sm mb-4">The AI analyses your mood logs, journal entries, and habits from the past 7 days and generates a personalised report with patterns and suggestions.</p>
+        <button onclick="generateReport()" id="generate-btn" class="btn-primary">
+            Generate Weekly Report
         </button>
     </div>
-
-    <div id="loading" class="hidden bg-white border border-peach-100 rounded-2xl p-8 shadow-sm mb-6 text-center">
+    <div id="loading" class="hidden card p-8 mb-6 text-center">
         <div class="flex justify-center gap-2 mb-3">
-            <div class="w-2 h-2 rounded-full bg-peach-300 animate-bounce"></div>
-            <div class="w-2 h-2 rounded-full bg-peach-300 animate-bounce" style="animation-delay:0.15s"></div>
-            <div class="w-2 h-2 rounded-full bg-peach-300 animate-bounce" style="animation-delay:0.3s"></div>
+            <div class="w-2 h-2 rounded-full animate-bounce" style="background:#f97340"></div>
+            <div class="w-2 h-2 rounded-full animate-bounce" style="background:#f97340;animation-delay:0.15s"></div>
+            <div class="w-2 h-2 rounded-full animate-bounce" style="background:#f97340;animation-delay:0.3s"></div>
         </div>
         <p class="text-gray-400 text-sm">Analysing your week...</p>
     </div>
-
-    <div id="report-result" class="hidden bg-white border border-peach-200 rounded-2xl p-6 shadow-sm mb-6">
-        <div class="flex items-center gap-2 mb-4 pb-3 border-b border-peach-100">
-            <span class="text-lg">🌸</span>
-            <h3 class="font-semibold text-gray-800">Your Personalised Weekly Report</h3>
-        </div>
-        <div id="report-text" class="text-gray-700 text-sm leading-relaxed whitespace-pre-line"></div>
+    <div id="report-result" class="hidden card p-6 mb-6" style="border-color:rgba(249,115,64,0.3)">
+        <h3 class="font-semibold text-gray-700 text-sm mb-4 pb-3 border-b border-gray-100">Your Personalised Weekly Report</h3>
+        <div id="report-text" class="text-gray-600 text-sm leading-relaxed whitespace-pre-line" style="font-family:Georgia,serif;line-height:1.9;"></div>
     </div>
-
     {% if past_reports %}
     <div class="mt-8">
         <h2 class="text-lg font-semibold text-gray-700 mb-4">Past Reports</h2>
         {% for report in past_reports %}
-        <div class="bg-white border border-peach-100 rounded-2xl p-5 mb-4 shadow-sm">
-            <div class="flex justify-between items-center mb-3">
-                <p class="text-sm font-medium text-gray-700">
-                    Week of {{ report.week_start|date:"F j" }} — {{ report.week_end|date:"F j, Y" }}
-                </p>
+        <div class="card p-5 mb-4">
+            <div class="flex justify-between items-center mb-3 pb-3 border-b border-gray-50">
+                <p class="text-sm font-medium text-gray-700">Week of {{ report.week_start|date:"F j" }} — {{ report.week_end|date:"F j, Y" }}</p>
                 <span class="text-xs text-gray-400">{{ report.created_at|date:"M j" }}</span>
             </div>
-            <div class="text-gray-600 text-sm leading-relaxed whitespace-pre-line">
-                {{ report.report_text }}
-            </div>
+            <div class="text-gray-600 text-sm leading-relaxed whitespace-pre-line" style="font-family:Georgia,serif;line-height:1.9;">{{ report.report_text }}</div>
         </div>
         {% endfor %}
     </div>
     {% endif %}
-
     <div class="mt-4 text-center">
-        <a href="{% url 'home' %}" class="text-sm text-gray-400 hover:text-peach-500">← Back to Home</a>
+        <a href="{% url 'dashboard' %}" class="text-sm text-gray-400 hover:text-peach-500">Back to Dashboard</a>
     </div>
 </div>
-
 <script>
 async function generateReport() {
     const btn = document.getElementById('generate-btn');
     const loading = document.getElementById('loading');
     const result = document.getElementById('report-result');
     const reportText = document.getElementById('report-text');
-
     btn.disabled = true;
     btn.textContent = 'Analysing...';
     loading.classList.remove('hidden');
     result.classList.add('hidden');
-
     try {
         const response = await fetch("{% url 'weekly_report' %}", {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': '{{ csrf_token }}'
-            },
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
             body: JSON.stringify({})
         });
-
         const data = await response.json();
         loading.classList.add('hidden');
-
-        if (data.error) {
-            alert(data.error);
-            btn.disabled = false;
-            btn.textContent = 'Generate My Weekly Report 🌸';
-            return;
-        }
-
+        if (data.error) { alert(data.error); btn.disabled = false; btn.textContent = 'Generate Weekly Report'; return; }
         reportText.textContent = data.report;
         result.classList.remove('hidden');
-        btn.textContent = 'Generate New Report 🌸';
+        btn.textContent = 'Generate New Report';
         btn.disabled = false;
-
     } catch (error) {
         loading.classList.add('hidden');
         alert('Something went wrong. Please try again.');
         btn.disabled = false;
-        btn.textContent = 'Generate My Weekly Report 🌸';
+        btn.textContent = 'Generate Weekly Report';
     }
 }
 </script>

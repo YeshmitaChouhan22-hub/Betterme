@@ -1,136 +1,208 @@
 {% extends 'users/base.html' %}
-{% block title %}Dashboard — BetterMe{% endblock %}
+{% block title %}Dashboard - BetterMe{% endblock %}
 
 {% block content %}
-<!-- Top Header Area -->
-<div class="mb-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-    <div>
-        <h1 class="section-title">Your Progress Hub</h1>
-        <p class="text-gray-500 text-sm font-body mt-1">Real-time indicators tracking your intentional daily growth habits.</p>
+<div class="mb-8">
+    <h1 class="text-2xl font-bold text-charcoal-100">Dashboard</h1>
+    <p class="text-charcoal-400 text-sm mt-1">Welcome back, {{ request.user.username }}</p>
+</div>
+
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+    <div class="bg-charcoal-800 border border-charcoal-700 rounded-2xl p-5 text-center">
+        <div class="text-3xl font-bold text-amber-400">{{ total_habits }}</div>
+        <div class="text-xs text-charcoal-400 mt-1">Total Habits</div>
     </div>
-    <div class="text-sm font-body text-gray-400 bg-cream-100 px-4 py-2 rounded-full border border-peach-100">
-        ✨ Today is <span class="text-peach-600 font-medium">{% now "A, F j" %}</span>
+    <div class="bg-charcoal-800 border border-charcoal-700 rounded-2xl p-5 text-center">
+        <div class="text-3xl font-bold text-amber-400">{{ completed_habits }}</div>
+        <div class="text-xs text-charcoal-400 mt-1">Done Today</div>
+    </div>
+    <div class="bg-charcoal-800 border border-charcoal-700 rounded-2xl p-5 text-center">
+        <div class="text-3xl font-bold text-amber-400">{{ total_journals }}</div>
+        <div class="text-xs text-charcoal-400 mt-1">Journal Entries</div>
+    </div>
+    <div class="bg-charcoal-800 border border-charcoal-700 rounded-2xl p-5 text-center">
+        <div class="text-3xl font-bold text-amber-400">{{ top_streak }}</div>
+        <div class="text-xs text-charcoal-400 mt-1">Top Streak</div>
     </div>
 </div>
 
-<!-- Premium Metrics Card Row Grid -->
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-    <div class="card p-6">
-        <p class="text-xs font-medium text-gray-400 uppercase tracking-widest font-body">Current Top Streak</p>
-        <p class="text-3xl font-bold font-display text-peach-500 mt-2">🔥 {{ top_streak }} Days</p>
-    </div>
-    
-    <div class="card p-6">
-        <p class="text-xs font-medium text-gray-400 uppercase tracking-widest font-body">Habit Completion</p>
-        <p class="text-3xl font-bold font-display text-gray-800 mt-2">✅ {{ completed_habits }} <span class="text-xl font-normal text-gray-400">/ {{ total_habits }}</span></p>
-    </div>
-    
-    <div class="card p-6">
-        <p class="text-xs font-medium text-gray-400 uppercase tracking-widest font-body">Journal Logs</p>
-        <p class="text-3xl font-bold font-display text-gray-800 mt-2">📓 {{ total_journals }} Entries</p>
-    </div>
-    
-    <div class="card p-6">
-        <p class="text-xs font-medium text-gray-400 uppercase tracking-widest font-body">Reflections Logged</p>
-        <p class="text-3xl font-bold font-display text-gray-800 mt-2">🌿 {{ total_reflections }} Days</p>
-    </div>
-</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
 
-<!-- Main Split Canvas Layout Section -->
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-    
-    <!-- Left Hand Side: Mood Breakdown Graph -->
-    <div class="card p-6 lg:col-span-2">
-        <div class="flex justify-between items-center mb-6">
-            <div>
-                <h3 class="font-display font-semibold text-lg text-gray-800">Mood & Sentiment Trends</h3>
-                <p class="text-xs text-gray-400 font-body">Visualized tracking of emotion logs</p>
-            </div>
+    <div class="bg-charcoal-800 border border-charcoal-700 rounded-2xl p-5">
+        <h3 class="font-semibold text-charcoal-200 text-sm mb-4">Emotion Calendar</h3>
+        <div class="flex justify-between items-center mb-2">
+            <button onclick="prevMonth()" class="text-charcoal-400 hover:text-amber-400 text-xs px-2 py-1 rounded transition">← Prev</button>
+            <span id="calendar-title" class="text-charcoal-300 text-xs font-medium"></span>
+            <button onclick="nextMonth()" class="text-charcoal-400 hover:text-amber-400 text-xs px-2 py-1 rounded transition">Next →</button>
         </div>
-        
-        {% if chart_labels %}
-            <!-- Canvas target wrapper container -->
-            <div class="relative w-full h-64">
-                <canvas id="moodChart"></canvas>
-            </div>
+        <div class="grid grid-cols-7 gap-1 mb-1">
+            {% for day in "SMTWTFS" %}
+            <div class="text-center text-charcoal-500" style="font-size:9px">{{ day }}</div>
+            {% endfor %}
+        </div>
+        <div id="calendar-grid" class="grid grid-cols-7 gap-1"></div>
+        <div class="flex gap-2 flex-wrap mt-3">
+            <span class="flex items-center gap-1" style="font-size:9px;color:#a1a1aa"><span class="w-2 h-2 rounded-sm inline-block" style="background:#86efac"></span>Happy</span>
+            <span class="flex items-center gap-1" style="font-size:9px;color:#a1a1aa"><span class="w-2 h-2 rounded-sm inline-block" style="background:#93c5fd"></span>Calm</span>
+            <span class="flex items-center gap-1" style="font-size:9px;color:#a1a1aa"><span class="w-2 h-2 rounded-sm inline-block" style="background:#fca5a5"></span>Stressed</span>
+            <span class="flex items-center gap-1" style="font-size:9px;color:#a1a1aa"><span class="w-2 h-2 rounded-sm inline-block" style="background:#fcd34d"></span>Motivated</span>
+            <span class="flex items-center gap-1" style="font-size:9px;color:#a1a1aa"><span class="w-2 h-2 rounded-sm inline-block" style="background:#c4b5fd"></span>Emotional</span>
+            <span class="flex items-center gap-1" style="font-size:9px;color:#a1a1aa"><span class="w-2 h-2 rounded-sm inline-block" style="background:#52525b"></span>Tired</span>
+        </div>
+    </div>
+
+    <div class="bg-charcoal-800 border border-charcoal-700 rounded-2xl p-5">
+        <h3 class="font-semibold text-charcoal-200 text-sm mb-4">Habit Consistency — Last 7 Days</h3>
+        <canvas id="consistencyChart" height="180"></canvas>
+    </div>
+
+</div>
+
+<div id="day-detail" class="hidden bg-charcoal-800 border border-amber-500 rounded-2xl p-5 mb-6">
+    <div class="flex justify-between items-start mb-3">
+        <h4 id="detail-date" class="font-semibold text-charcoal-200 text-sm"></h4>
+        <button onclick="closeDayDetail()" class="text-charcoal-500 hover:text-charcoal-300 text-xs">close</button>
+    </div>
+    <div id="detail-emotion" class="mb-3"></div>
+    <div id="detail-journal"></div>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="bg-charcoal-800 border border-charcoal-700 rounded-2xl p-5">
+        <h3 class="font-semibold text-charcoal-200 text-sm mb-4">Mood Frequency</h3>
+        {% if mood_labels %}
+        <canvas id="moodChart" height="200"></canvas>
         {% else %}
-            <!-- Graceful Null / Empty State Handling UI -->
-            <div class="flex flex-col items-center justify-center py-16 text-center">
-                <span class="text-4xl mb-3">💭</span>
-                <p class="text-sm font-body text-gray-400 max-w-xs">No mood metrics available yet. Submit a new reflection entry to unlock visual tracking components.</p>
-                <a href="{% url 'reflection_list' %}" class="btn-ghost mt-4 text-xs">Log Your Mood</a>
-            </div>
+        <div class="text-center py-8 text-charcoal-500 text-sm">
+            <p>No reflections yet</p>
+            <a href="{% url 'reflection_create' %}" class="text-amber-400 text-xs hover:underline mt-1 block">Log your first one</a>
+        </div>
         {% endif %}
     </div>
 
-    <!-- Right Hand Side: Action Workspace Toolbox Panel -->
-    <div class="card p-6 border-l-2 border-l-peach-300">
-        <h3 class="font-display font-semibold text-lg text-gray-800 mb-2">Workspace Toolbelt</h3>
-        <p class="text-xs font-body text-gray-400 mb-6">Quickly jump into alternative active workspace environments.</p>
-        
-        <div class="space-y-3 font-body">
-            <a href="{% url 'habit_list' %}" class="flex items-center justify-between w-full text-left bg-cream-50 border border-peach-100 text-gray-700 p-3 rounded-xl hover:border-peach-300 transition text-sm shadow-sm group">
-                <span>🎯 Actionable Habits</span>
-                <span class="text-gray-300 group-hover:text-peach-400 transition">&rarr;</span>
-            </a>
-            
-            <a href="{% url 'journal_list' %}" class="flex items-center justify-between w-full text-left bg-cream-50 border border-peach-100 text-gray-700 p-3 rounded-xl hover:border-peach-300 transition text-sm shadow-sm group">
-                <span>📝 Write Journal Log</span>
-                <span class="text-gray-300 group-hover:text-peach-400 transition">&rarr;</span>
-            </a>
-            
-            <a href="{% url 'reflection_list' %}" class="flex items-center justify-between w-full text-left bg-peach-500 text-white p-3 rounded-xl hover:bg-peach-600 transition text-sm shadow-md font-medium group">
-                <span>✨ New Self Reflection</span>
-                <span class="text-peach-200 group-hover:text-white transition">&rarr;</span>
-            </a>
+    <div class="bg-charcoal-800 border border-charcoal-700 rounded-2xl p-5">
+        <h3 class="font-semibold text-charcoal-200 text-sm mb-4">Habit Streaks</h3>
+        {% if habit_labels %}
+        <canvas id="habitChart" height="200"></canvas>
+        {% else %}
+        <div class="text-center py-8 text-charcoal-500 text-sm">
+            <p>No habits yet</p>
+            <a href="{% url 'habit_create' %}" class="text-amber-400 text-xs hover:underline mt-1 block">Add your first habit</a>
         </div>
+        {% endif %}
     </div>
 </div>
 
-<!-- ChartJS Execution Integration Layer -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        const ctx = document.getElementById('moodChart');
-        if (ctx) {
-            new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: {{ chart_labels|safe }},
-                    datasets: [{
-                        label: 'Days Logged',
-                        data: {{ chart_data|safe }},
-                        backgroundColor: 'rgba(255, 176, 136, 0.65)',
-                        borderColor: '#f97340',
-                        borderWidth: 1.5,
-                        borderRadius: 8,
-                        borderSkipped: false
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        x: {
-                            grid: { display: false },
-                            ticks: { font: { family: 'DM Sans', size: 11 }, color: '#9ca3af' }
-                        },
-                        y: {
-                            grid: { color: 'rgba(255, 208, 176, 0.15)' },
-                            beginAtZero: true,
-                            ticks: { 
-                                stepSize: 1,
-                                font: { family: 'DM Sans', size: 11 }, 
-                                color: '#9ca3af' 
-                            }
-                        }
-                    },
-                    plugins: {
-                        legend: { display: false }
-                    }
-                }
-            });
+const emotionByDate = {{ emotion_by_date|safe }};
+const journalByDate = {{ journal_by_date|safe }};
+const emotionColors = {
+    happy:'#86efac', calm:'#93c5fd', peaceful:'#93c5fd',
+    stressed:'#fca5a5', motivated:'#fcd34d', emotional:'#c4b5fd',
+    tired:'#52525b', relaxed:'#52525b'
+};
+let currentDate = new Date();
+
+function renderCalendar(date) {
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    document.getElementById('calendar-title').textContent = `${months[month]} ${year}`;
+    const grid = document.getElementById('calendar-grid');
+    grid.innerHTML = '';
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const today = new Date();
+    for (let i = 0; i < firstDay; i++) grid.appendChild(document.createElement('div'));
+    for (let day = 1; day <= daysInMonth; day++) {
+        const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+        const emotion = emotionByDate[dateStr];
+        const hasJournal = journalByDate[dateStr];
+        const isToday = day === today.getDate() && month === today.getMonth() && year === today.getFullYear();
+        const cell = document.createElement('div');
+        cell.style.cssText = `aspect-ratio:1;border-radius:4px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:10px;cursor:${emotion||hasJournal?'pointer':'default'};background:${emotion?emotionColors[emotion]:'#27272a'};border:${isToday?'1.5px solid #fbbf24':'1px solid transparent'};transition:opacity 0.15s;`;
+        cell.innerHTML = `<span style="font-weight:500;color:${emotion?'#18181b':'#71717a'}">${day}</span>${hasJournal&&!emotion?'<span style="font-size:7px;color:#fbbf24">•</span>':''}`;
+        if (emotion || hasJournal) {
+            cell.addEventListener('click', () => showDayDetail(dateStr, emotion, hasJournal));
+            cell.addEventListener('mouseover', () => cell.style.opacity='0.75');
+            cell.addEventListener('mouseout', () => cell.style.opacity='1');
         }
-    });
+        grid.appendChild(cell);
+    }
+}
+
+function showDayDetail(dateStr, emotion, journal) {
+    const detail = document.getElementById('day-detail');
+    const dateObj = new Date(dateStr + 'T00:00:00');
+    document.getElementById('detail-date').textContent = dateObj.toLocaleDateString('en-US', {weekday:'long',year:'numeric',month:'long',day:'numeric'});
+    document.getElementById('detail-emotion').innerHTML = emotion
+        ? `<span style="display:inline-flex;align-items:center;gap:6px;background:${emotionColors[emotion]};color:#18181b;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:500">${emotion.charAt(0).toUpperCase()+emotion.slice(1)}</span>`
+        : '';
+    document.getElementById('detail-journal').innerHTML = journal
+        ? `<p style="font-size:11px;color:#a1a1aa;margin-bottom:4px">Journal entry</p><p style="font-size:12px;color:#e4e4e7;line-height:1.6">${journal}${journal.length>=200?'...':''}</p>`
+        : `<p style="font-size:11px;color:#52525b">No journal entry for this day.</p>`;
+    detail.classList.remove('hidden');
+    detail.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function closeDayDetail() { document.getElementById('day-detail').classList.add('hidden'); }
+function prevMonth() { currentDate.setMonth(currentDate.getMonth()-1); renderCalendar(currentDate); closeDayDetail(); }
+function nextMonth() { currentDate.setMonth(currentDate.getMonth()+1); renderCalendar(currentDate); closeDayDetail(); }
+renderCalendar(currentDate);
+
+const consistencyCtx = document.getElementById('consistencyChart').getContext('2d');
+new Chart(consistencyCtx, {
+    type: 'line',
+    data: {
+        labels: {{ day_labels|safe }},
+        datasets: [{
+            label: 'Completion %',
+            data: {{ consistency_data|safe }},
+            borderColor: '#fbbf24',
+            backgroundColor: 'rgba(251,191,36,0.1)',
+            borderWidth: 2,
+            pointBackgroundColor: '#fbbf24',
+            pointRadius: 4,
+            tension: 0.4,
+            fill: true,
+        }]
+    },
+    options: {
+        plugins: { legend: { display: false } },
+        scales: {
+            y: { beginAtZero: true, max: 100, ticks: { color: '#71717a', font: { size: 11 } }, grid: { color: '#27272a' } },
+            x: { ticks: { color: '#71717a', font: { size: 11 } }, grid: { display: false } }
+        }
+    }
+});
+
+{% if mood_labels %}
+new Chart(document.getElementById('moodChart').getContext('2d'), {
+    type: 'doughnut',
+    data: {
+        labels: {{ mood_labels|safe }},
+        datasets: [{ data: {{ mood_data|safe }}, backgroundColor: ['#fbbf24','#f59e0b','#d97706','#92400e','#fcd34d','#fde68a','#fffbeb'], borderWidth: 0 }]
+    },
+    options: { plugins: { legend: { position: 'bottom', labels: { color: '#a1a1aa', font: { size: 11 } } } } }
+});
+{% endif %}
+
+{% if habit_labels %}
+new Chart(document.getElementById('habitChart').getContext('2d'), {
+    type: 'bar',
+    data: {
+        labels: {{ habit_labels|safe }},
+        datasets: [{ label: 'Streak', data: {{ habit_streaks|safe }}, backgroundColor: '#fbbf24', borderRadius: 6, borderWidth: 0 }]
+    },
+    options: {
+        plugins: { legend: { display: false } },
+        scales: {
+            y: { beginAtZero: true, ticks: { stepSize: 1, color: '#71717a', font: { size: 11 } }, grid: { color: '#27272a' } },
+            x: { ticks: { color: '#71717a', font: { size: 11 } }, grid: { display: false } }
+        }
+    }
+});
+{% endif %}
 </script>
 {% endblock %}

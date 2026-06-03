@@ -1,35 +1,21 @@
 {% extends 'users/base.html' %}
 {% block title %}Your Affirmation - BetterMe{% endblock %}
-
 {% block content %}
 <div class="max-w-md mx-auto text-center py-10">
-    <div class="text-6xl mb-6">🌸</div>
-    <h2 class="text-2xl font-bold text-gray-800 mb-2">Your Daily Affirmation</h2>
+    <h2 class="section-title mb-2">Your Daily Affirmation</h2>
     <p class="text-gray-400 text-sm mb-8">Based on how you felt and what you did today</p>
-
-    <div class="bg-white border border-peach-200 rounded-2xl p-8 shadow-sm mb-6">
+    <div class="card p-8 mb-6">
         <div class="flex justify-center gap-3 mb-6">
-            <span class="bg-peach-50 text-peach-500 px-4 py-1 rounded-full text-sm">
-                {{ reflection.emotion }}
-            </span>
-            <span class="bg-cream-100 text-gray-500 px-4 py-1 rounded-full text-sm">
-                {{ reflection.activity }}
-            </span>
+            <span class="text-xs px-4 py-1 rounded-full bg-peach-50 text-peach-500 border border-peach-100">{{ reflection.emotion }}</span>
+            <span class="text-xs px-4 py-1 rounded-full bg-gray-50 text-gray-500 border border-gray-100">{{ reflection.activity }}</span>
         </div>
-        <p class="text-xl text-peach-600 font-medium leading-relaxed italic">
+        <p class="text-xl text-gray-700 font-medium leading-relaxed italic" style="font-family:'Playfair Display',serif;">
             "{{ reflection.affirmation }}"
         </p>
     </div>
-
     <div class="flex flex-col gap-3">
-        <a href="{% url 'reflection_create' %}"
-            class="bg-peach-400 hover:bg-peach-500 text-white font-medium py-2 rounded-xl transition">
-            Log Another Reflection
-        </a>
-        <a href="{% url 'home' %}"
-            class="bg-white border border-peach-100 text-gray-500 font-medium py-2 rounded-xl hover:border-peach-300 transition">
-            Back to Home
-        </a>
+        <a href="{% url 'reflection_create' %}" class="btn-primary text-center py-2 block">Log Another Reflection</a>
+        <a href="{% url 'dashboard' %}" class="btn-ghost text-center py-2 block">Back to Dashboard</a>
     </div>
 </div>
 {% endblock %}
