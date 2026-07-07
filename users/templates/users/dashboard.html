@@ -67,27 +67,17 @@
     <div id="detail-journal"></div>
 </div>
 
-<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="grid grid-cols-1 gap-6">
     <div class="bg-charcoal-800 border border-charcoal-700 rounded-2xl p-5">
         <h3 class="font-semibold text-charcoal-200 text-sm mb-4">Mood Frequency</h3>
         {% if mood_labels %}
-        <canvas id="moodChart" height="200"></canvas>
+        <div class="max-w-md mx-auto">
+            <canvas id="moodChart" height="200"></canvas>
+        </div>
         {% else %}
         <div class="text-center py-8 text-charcoal-500 text-sm">
             <p>No reflections yet</p>
             <a href="{% url 'reflection_create' %}" class="text-amber-400 text-xs hover:underline mt-1 block">Log your first one</a>
-        </div>
-        {% endif %}
-    </div>
-
-    <div class="bg-charcoal-800 border border-charcoal-700 rounded-2xl p-5">
-        <h3 class="font-semibold text-charcoal-200 text-sm mb-4">Habit Streaks</h3>
-        {% if habit_labels %}
-        <canvas id="habitChart" height="200"></canvas>
-        {% else %}
-        <div class="text-center py-8 text-charcoal-500 text-sm">
-            <p>No habits yet</p>
-            <a href="{% url 'habit_create' %}" class="text-amber-400 text-xs hover:underline mt-1 block">Add your first habit</a>
         </div>
         {% endif %}
     </div>
@@ -188,21 +178,6 @@ new Chart(document.getElementById('moodChart').getContext('2d'), {
 });
 {% endif %}
 
-{% if habit_labels %}
-new Chart(document.getElementById('habitChart').getContext('2d'), {
-    type: 'bar',
-    data: {
-        labels: {{ habit_labels|safe }},
-        datasets: [{ label: 'Streak', data: {{ habit_streaks|safe }}, backgroundColor: '#fbbf24', borderRadius: 6, borderWidth: 0 }]
-    },
-    options: {
-        plugins: { legend: { display: false } },
-        scales: {
-            y: { beginAtZero: true, ticks: { stepSize: 1, color: '#71717a', font: { size: 11 } }, grid: { color: '#27272a' } },
-            x: { ticks: { color: '#71717a', font: { size: 11 } }, grid: { display: false } }
-        }
-    }
-});
-{% endif %}
+
 </script>
 {% endblock %}
